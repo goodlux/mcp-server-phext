@@ -64,6 +64,119 @@ def create_server(default_phext_file: Optional[str] = None) -> FastMCP:
     logger.info("Enhanced Phext MCP server initializing with performance optimizations")
     
     # ============================================================================
+    # INITIALIZATION & GUIDANCE
+    # ============================================================================
+    
+    @mcp.tool()
+    def initialize_phext() -> str:
+        """Initialize conversation with phext usage instructions and guidance."""
+        return """
+🚀 ENHANCED PHEXT MCP SERVER INITIALIZED! 🚀
+
+📚 WHAT IS PHEXT?
+Phext is a multi-dimensional coordinate system for organizing information.
+Think of it like a super-powered filing system where every piece of content
+has a precise coordinate address like: 1.1.1/1.1.1/2.1.1/1.1
+
+🏗️ COORDINATE STRUCTURE:
+Library.Shelf.Series / Collection.Volume.Book / Chapter.Section.Scroll / Line.Column
+Example: 1.1.1/1.1.1/2.1.1/1.1 = Library 1, Collection 1, Chapter 2, Line 1
+
+🔧 58 AVAILABLE TOOLS ORGANIZED BY CATEGORY:
+
+📝 ENHANCED BASIC OPERATIONS (10 tools):
+• enhanced_phext_fetch - Get content from coordinate
+• enhanced_phext_insert - Add content at coordinate  
+• enhanced_phext_replace - Replace content at coordinate
+• enhanced_phext_remove - Delete content at coordinate
+• enhanced_phext_create_file - Create new phext file
+• enhanced_phext_explode - Show all coordinates and content
+• enhanced_phext_textmap - Visualize structure with previews
+• enhanced_phext_normalize - Clean up and optimize file
+• enhanced_phext_merge - Combine two phext files
+• enhanced_phext_range_replace - Replace content across coordinate range
+
+⚡ PERFORMANCE & MEMORY (6 tools):
+• performance_phext_load_to_memory - Load file into hash for speed
+• performance_phext_memory_status - Check what's loaded in memory
+• performance_phext_file_info - Get file metadata and statistics
+• performance_phext_flush_to_disk - Force save changes to disk
+• performance_phext_unload_file - Remove file from memory
+• performance_phext_optimize_memory - Clean up and optimize memory
+
+🗃️ DATABASE-STYLE OPERATIONS (7 tools):
+• sq_phext_select - Database-style content selection
+• sq_phext_toc - Table of contents with metadata
+• sq_phext_checksum - File integrity verification
+• sq_phext_delta - Hierarchical checksums
+• sq_phext_push - Write local file to coordinate
+• sq_phext_pull - Extract coordinate to local file
+• sq_phext_get_full - Complete file export with metadata
+
+🧭 COORDINATE NAVIGATION (6 tools):
+• coord_phext_coordinate_info - Analyze coordinate structure
+• coord_phext_parse_coordinate - Validate coordinate format
+• coord_phext_navigate - Move through dimensions (up/down/left/right/forward/back)
+• coord_phext_find_next_scroll - Find next available coordinates
+• coord_phext_coordinate_distance - Calculate distance between coordinates
+• coord_phext_coordinate_bounds - Find min/max coordinates in file
+
+📦 BULK OPERATIONS (8 tools):
+• bulk_phext_bulk_insert - Insert multiple coordinate→content pairs
+• bulk_phext_bulk_fetch - Get multiple coordinates at once
+• bulk_phext_bulk_update - Update multiple coordinates atomically
+• bulk_phext_bulk_delete - Remove multiple coordinates efficiently
+• bulk_phext_range_select - Get all coordinates in range
+• bulk_phext_range_delete - Delete coordinate range
+• bulk_phext_range_copy - Copy range to different location
+• bulk_phext_range_move - Move range to different location
+
+🔍 SEARCH & QUERY (7 tools):
+• search_phext_search_content - Text search across all coordinates
+• search_phext_search_coordinates - Search coordinate patterns
+• search_phext_search_regex - Regular expression search
+• search_phext_find_empty - Find empty coordinates
+• search_phext_find_duplicates - Find duplicate content
+• search_phext_filter_coordinates - Filter by multiple criteria
+• search_phext_content_statistics - Generate detailed analytics
+
+🎯 QUICK START EXAMPLES:
+1. Create your first phext file:
+   enhanced_phext_create_file("~/my_notes.phext", "My personal knowledge base")
+
+2. Add some content:
+   enhanced_phext_insert("1.1.1/1.1.1/1.1.1/1.1", "Welcome to my notes!", "~/my_notes.phext")
+
+3. See the structure:
+   sq_phext_toc("~/my_notes.phext")
+
+4. Search your content:
+   search_phext_search_content("welcome", "~/my_notes.phext")
+
+💡 PRO TIPS:
+• Use meaningful coordinate patterns (e.g., 1.1.1/1.1.1/PROJECT_NAME/TOPIC/1.1)
+• Load files to memory for better performance: performance_phext_load_to_memory()
+• Use bulk operations for multiple changes: bulk_phext_bulk_insert()
+• Regular navigation: coord_phext_navigate() for moving through your data
+• File integrity: sq_phext_checksum() to verify data integrity
+
+🌟 ADVANCED FEATURES:
+• Hash-based optimization for lightning-fast operations
+• Cross-file operations with perfect data integrity
+• Real-time memory management and optimization
+• Enterprise-grade bulk processing
+• Sophisticated search with regex and filtering
+• Multi-dimensional coordinate navigation
+
+📖 DEFAULT FILE:
+Your default phext file is set to: ~/.claude/claude_desktop.phext
+All operations without a file_path parameter will use this file.
+
+🚀 Ready to revolutionize your information management with phext!
+Start with initialize_phext() to see this guide anytime.
+        """
+    
+    # ============================================================================
     # BASIC OPERATIONS (Enhanced with hash-based performance)
     # ============================================================================
     
@@ -307,7 +420,7 @@ def create_server(default_phext_file: Optional[str] = None) -> FastMCP:
         """Generate detailed content statistics and analysis."""
         return phext_content_statistics(file_path)
     
-    logger.info(f"Registered {len(mcp._tools)} phext tools with enhanced functionality")
+    logger.info("Registered phext tools with enhanced functionality (59 total tools)")
     
     return mcp
 
@@ -321,7 +434,7 @@ def main():
     server = create_server(default_phext_file=default_phext_file)
     
     # Start the server
-    logger.info("Enhanced Phext MCP server starting...")
+    logger.info("Starting enhanced Phext MCP server with 59 tools")
     server.run()
 
 

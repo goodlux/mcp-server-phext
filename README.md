@@ -2,6 +2,50 @@
 
 An MCP (Model Context Protocol) server that provides access to [phext](https://pypi.org/project/libphext/) - a hyperdimensional text processing system.
 
+> **NOTE**: We will be publishing this as a pip package soon. For now, please use the developer installation below.
+
+## Developer Installation
+
+For developers who want to try the latest features:
+
+1. **Download the repository:**
+   ```bash
+   git clone https://github.com/your-org/mcp-server-phext.git
+   cd mcp-server-phext
+   ```
+
+2. **Install uv (if you haven't already):**
+   ```bash
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   uv sync
+   ```
+
+4. **Add to Claude Desktop config:**
+   ```json
+   {
+     "mcpServers": {
+       "phext-dev": {
+         "command": "uv",
+         "args": [
+           "run",
+           "--directory",
+           "{full path to your local mcp-server-phext repo}",
+           "python",
+           "-m",
+           "mcp_server_phext"
+         ],
+         "env": {
+           "PHEXT_DEFAULT_FILE": "~/.claude/claude_desktop.phext"
+         }
+       }
+     }
+   }
+   ```
+
 ## What is Phext?
 
 Phext is a hyperdimensional text coordinate system that allows you to organize and navigate text in three-dimensional space using coordinates like `1.1.1`, `2.3.4`, etc. It enables unique ways of structuring and accessing textual information.
