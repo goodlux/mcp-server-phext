@@ -10,11 +10,11 @@ For developers who want to try the latest features:
 
 1. **Download the repository:**
    ```bash
-   git clone https://github.com/your-org/mcp-server-phext.git
+   git clone https://github.com/identimoji/mcp-server-phext.git
    cd mcp-server-phext
    ```
 
-2. **Install uv (if you haven't already):**
+2. **Install uv (if you haven't already, skip this if you have):**
    ```bash
    curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
@@ -24,7 +24,10 @@ For developers who want to try the latest features:
    uv sync
    ```
 
-4. **Add to Claude Desktop config:**
+4. **Add to Claude Desktop config:** 
+
+> **IMPORTANT**: You'll need to add the full path to the repo you just downloaded here
+
    ```json
    {
      "mcpServers": {
@@ -61,7 +64,9 @@ uv add mcp-server-phext
 pip install mcp-server-phext
 ```
 
-## Usage
+## Usage 
+
+> **NOTE**: Thes are instructions for once this mcp server is published to pip ... IGNORE FOR NOW, use above development install.
 
 ### With Claude Desktop
 
