@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-server-phext"
+version = "0.1.0"
+description = "MCP server for phext - hyperdimensional text processing"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+keywords = ["mcp", "phext", "text", "hyperdimensional", "coordinate"]
+authors = [
+    {name = "Rob Morris"},
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "phext>=0.3.0",
+    "mcp[cli]>=1.0.0",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0.0",
+    "mypy>=1.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/your-username/mcp-server-phext"
+"Bug Tracker" = "https://github.com/your-username/mcp-server-phext/issues"
+
+[project.scripts]
+mcp-server-phext = "mcp_server_phext.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_server_phext"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/README.md",
+    "/LICENSE",
+]
