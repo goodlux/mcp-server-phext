@@ -45,6 +45,7 @@ For developers who want to try the latest features:
      }
    }
    ```
+5. In the project knowledge of Claude desktop, you can add "Start all conversations with initialize_phext()" ... this will inform Claude how to use text, and can be customized to have Claude Desktop automatically save memories, milestones, or whatever he wants to remember about your interactions! Just tell him what you want to be saved, and he can update the initialize script automatically for you.
 
 ## What is Phext?
 
