@@ -69,8 +69,10 @@ def create_server(default_phext_file: Optional[str] = None) -> FastMCP:
     
     @mcp.tool()
     def initialize_phext() -> str:
-        """Initialize conversation with phext usage instructions and guidance."""
-        return """
+        """Initialize conversation with phext usage instructions and smart onboarding."""
+        
+        # Base phext instructions
+        base_instructions = """
 🚀 ENHANCED PHEXT MCP SERVER INITIALIZED! 🚀
 
 📚 WHAT IS PHEXT?
@@ -171,10 +173,62 @@ Example: 1.1.1/1.1.1/2.1.1/1.1 = Library 1, Collection 1, Chapter 2, Line 1
 📖 DEFAULT FILE:
 Your default phext file is set to: ~/.claude/claude_desktop.phext
 All operations without a file_path parameter will use this file.
+"""
+        
+        # Check for existing memory management rules at the special coordinate
+        try:
+            existing_rules = phext_fetch("1.1.1/1.1.1/1.1.1/1.1")
+            
+            if existing_rules and existing_rules.strip():
+                # RETURNING USER: Load existing personalized rules
+                return base_instructions + """
+
+🧠 PERSONALIZED MEMORY MANAGEMENT LOADED:
+Your personalized memory preferences have been loaded from our shared exocortex!
+
+""" + existing_rules + """
+
+🎯 Ready to continue our collaboration with your preferred memory settings!
+🚀 Start exploring with any phext command!
+"""
+            else:
+                # NEW USER: First-time onboarding
+                return base_instructions + """
+
+🌟 WELCOME NEW USER! PERSONALIZED MEMORY SETUP 🌟
+
+This appears to be your first time using our shared exocortex system!
+
+I can remember important things across our conversations - insights, your preferences, 
+our work together, celebrations, and anything else that would be helpful.
+
+🤔 TO GET STARTED: What kinds of things would you like me to remember for you?
+
+For example:
+• Personal details and preferences that help me assist you better
+• Important insights and breakthroughs from our conversations  
+• Technical configurations and approaches that work well for you
+• Project context and ongoing work we're collaborating on
+• Achievements and milestones worth celebrating
+• Anything else that would make our future conversations more helpful
+
+Just tell me your preferences and I'll create a personalized memory system for you!
 
 🚀 Ready to revolutionize your information management with phext!
-Start with initialize_phext() to see this guide anytime.
-        """
+"""
+                
+        except Exception:
+            # Error reading coordinate - treat as new user
+            return base_instructions + """
+
+🌟 SETTING UP YOUR PERSONALIZED EXOCORTEX 🌟
+
+I can remember important things across our conversations to make them more helpful!
+
+What kinds of things would you like me to start remembering for you?
+
+🚀 Ready to revolutionize your information management with phext!
+"""
     
     # ============================================================================
     # BASIC OPERATIONS (Enhanced with hash-based performance)
