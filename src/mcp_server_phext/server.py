@@ -1,4 +1,4 @@
-"""MCP server implementation for phext."""
+"""MCP server implementation for phext with enhanced performance and functionality."""
 
 import os
 import logging
@@ -15,6 +15,35 @@ except ImportError as e:
         "Install it with: pip install phext"
     ) from e
 
+# Import enhanced core modules
+from .core.state import init_state, get_state
+from .core.basic import (
+    phext_fetch, phext_insert, phext_replace, phext_remove,
+    phext_range_replace, phext_explode, phext_textmap,
+    phext_normalize, phext_merge, phext_create_file
+)
+from .core.performance import (
+    phext_load_to_memory, phext_flush_to_disk, phext_memory_status,
+    phext_unload_file, phext_file_info, phext_optimize_memory
+)
+from .core.sq_api import (
+    phext_select, phext_toc, phext_delta, phext_checksum,
+    phext_push, phext_pull, phext_get_full
+)
+from .core.coordinates import (
+    phext_coordinate_info, phext_parse_coordinate, phext_navigate,
+    phext_find_next_scroll, phext_coordinate_distance, phext_coordinate_bounds
+)
+from .core.bulk import (
+    phext_bulk_insert, phext_bulk_fetch, phext_bulk_update, phext_bulk_delete,
+    phext_range_select, phext_range_delete, phext_range_copy, phext_range_move
+)
+from .core.search import (
+    phext_search_content, phext_search_coordinates, phext_search_regex,
+    phext_find_empty, phext_find_duplicates, phext_filter_coordinates,
+    phext_content_statistics
+)
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -23,212 +52,262 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class PhextServerState:
-    """Manages the state of phext files and operations."""
-    
-    def __init__(self, default_phext_file: Optional[str] = None):
-        self.default_phext_file = default_phext_file
-        self.phext_buffers: Dict[str, str] = {}
-        self.phext = Phext()
-    
-    def get_file_path(self, file_path: Optional[str] = None) -> str:
-        """Get the file path to use, defaulting to the configured default."""
-        if file_path is None:
-            file_path = self.default_phext_file
-        
-        if file_path is None:
-            raise ValueError("No phext file specified and no default set")
-        
-        # Expand user path
-        return os.path.expanduser(file_path)
-    
-    def load_file(self, file_path: str) -> str:
-        """Load a phext file into memory, creating if it doesn't exist."""
-        if file_path not in self.phext_buffers:
-            try:
-                if os.path.exists(file_path):
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        self.phext_buffers[file_path] = f.read()
-                else:
-                    # Create new empty phext file
-                    self.phext_buffers[file_path] = ""
-                    os.makedirs(os.path.dirname(file_path), exist_ok=True)
-            except Exception as e:
-                raise RuntimeError(f"Error loading phext file {file_path}: {str(e)}")
-        
-        return self.phext_buffers[file_path]
-    
-    def save_file(self, file_path: str) -> None:
-        """Save the phext buffer to disk."""
-        try:
-            os.makedirs(os.path.dirname(file_path), exist_ok=True)
-            with open(file_path, 'w', encoding='utf-8') as f:
-                f.write(self.phext_buffers[file_path])
-        except Exception as e:
-            raise RuntimeError(f"Error saving phext file {file_path}: {str(e)}")
-
-
 def create_server(default_phext_file: Optional[str] = None) -> FastMCP:
     """Create and configure the FastMCP server for phext."""
     
     # Create FastMCP server
     mcp = FastMCP(name="mcp-server-phext")
     
-    # Initialize state
-    state = PhextServerState(default_phext_file)
+    # Initialize enhanced state
+    init_state(default_phext_file)
     
-    logger.info("Phext MCP server initializing")
+    logger.info("Enhanced Phext MCP server initializing with performance optimizations")
     
-    # Register phext tools using FastMCP decorators
+    # ============================================================================
+    # BASIC OPERATIONS (Enhanced with hash-based performance)
+    # ============================================================================
+    
     @mcp.tool()
-    def phext_fetch(coordinate: str, file_path: Optional[str] = None) -> str:
+    def enhanced_phext_fetch(coordinate: str, file_path: Optional[str] = None) -> str:
         """Fetch content from a specific phext coordinate."""
-        try:
-            coord = Coordinate.from_string(coordinate)
-            actual_file_path = state.get_file_path(file_path)
-            buffer = state.load_file(actual_file_path)
-            content = state.phext.fetch(buffer, coord)
-            return content or "(empty)"
-        except Exception as e:
-            raise RuntimeError(f"Error fetching phext coordinate: {str(e)}")
+        return phext_fetch(coordinate, file_path)
     
     @mcp.tool()
-    def phext_insert(coordinate: str, content: str, file_path: Optional[str] = None) -> str:
+    def enhanced_phext_insert(coordinate: str, content: str, file_path: Optional[str] = None) -> str:
         """Insert content at a phext coordinate (appends to existing content)."""
-        try:
-            coord = Coordinate.from_string(coordinate)
-            actual_file_path = state.get_file_path(file_path)
-            buffer = state.load_file(actual_file_path)
-            new_buffer = state.phext.insert(buffer, coord, content)
-            state.phext_buffers[actual_file_path] = new_buffer
-            state.save_file(actual_file_path)
-            return f"Successfully inserted content at {coordinate}"
-        except Exception as e:
-            raise RuntimeError(f"Error inserting to phext coordinate: {str(e)}")
+        return phext_insert(coordinate, content, file_path)
     
     @mcp.tool()
-    def phext_replace(coordinate: str, content: str, file_path: Optional[str] = None) -> str:
+    def enhanced_phext_replace(coordinate: str, content: str, file_path: Optional[str] = None) -> str:
         """Replace content at a phext coordinate."""
-        try:
-            coord = Coordinate.from_string(coordinate)
-            actual_file_path = state.get_file_path(file_path)
-            buffer = state.load_file(actual_file_path)
-            new_buffer = state.phext.replace(buffer, coord, content)
-            state.phext_buffers[actual_file_path] = new_buffer
-            state.save_file(actual_file_path)
-            return f"Successfully replaced content at {coordinate}"
-        except Exception as e:
-            raise RuntimeError(f"Error replacing phext coordinate: {str(e)}")
+        return phext_replace(coordinate, content, file_path)
     
     @mcp.tool()
-    def phext_remove(coordinate: str, file_path: Optional[str] = None) -> str:
+    def enhanced_phext_remove(coordinate: str, file_path: Optional[str] = None) -> str:
         """Remove content at a phext coordinate."""
-        try:
-            coord = Coordinate.from_string(coordinate)
-            actual_file_path = state.get_file_path(file_path)
-            buffer = state.load_file(actual_file_path)
-            new_buffer = state.phext.remove(buffer, coord)
-            state.phext_buffers[actual_file_path] = new_buffer
-            state.save_file(actual_file_path)
-            return f"Successfully removed content at {coordinate}"
-        except Exception as e:
-            raise RuntimeError(f"Error removing phext coordinate: {str(e)}")
+        return phext_remove(coordinate, file_path)
     
     @mcp.tool()
-    def phext_range_replace(start_coordinate: str, end_coordinate: str, content: str, file_path: Optional[str] = None) -> str:
+    def enhanced_phext_range_replace(start_coordinate: str, end_coordinate: str, content: str, file_path: Optional[str] = None) -> str:
         """Replace content across a range of coordinates."""
-        try:
-            start_coord = Coordinate.from_string(start_coordinate)
-            end_coord = Coordinate.from_string(end_coordinate)
-            range_obj = Range(start_coord, end_coord)
-            actual_file_path = state.get_file_path(file_path)
-            buffer = state.load_file(actual_file_path)
-            new_buffer = state.phext.range_replace(buffer, range_obj, content)
-            state.phext_buffers[actual_file_path] = new_buffer
-            state.save_file(actual_file_path)
-            return f"Successfully replaced range {start_coordinate} to {end_coordinate}"
-        except Exception as e:
-            raise RuntimeError(f"Error replacing phext range: {str(e)}")
+        return phext_range_replace(start_coordinate, end_coordinate, content, file_path)
     
     @mcp.tool()
-    def phext_explode(file_path: Optional[str] = None) -> str:
+    def enhanced_phext_explode(file_path: Optional[str] = None) -> str:
         """Get a map of all coordinates and their content in the phext."""
-        try:
-            actual_file_path = state.get_file_path(file_path)
-            buffer = state.load_file(actual_file_path)
-            coord_map = state.phext.explode(buffer)
-            
-            result_text = f"Found {len(coord_map)} coordinates:\\n"
-            for coord, content in coord_map.items():
-                preview = content[:100] + "..." if len(content) > 100 else content
-                result_text += f"  {coord}: {preview}\\n"
-            
-            return result_text
-        except Exception as e:
-            raise RuntimeError(f"Error exploding phext file: {str(e)}")
+        return phext_explode(file_path)
     
     @mcp.tool()
-    def phext_textmap(file_path: Optional[str] = None) -> str:
+    def enhanced_phext_textmap(file_path: Optional[str] = None) -> str:
         """Get a text-based map of all coordinates and content summaries."""
-        try:
-            actual_file_path = state.get_file_path(file_path)
-            buffer = state.load_file(actual_file_path)
-            textmap = state.phext.textmap(buffer)
-            return textmap or "(empty phext)"
-        except Exception as e:
-            raise RuntimeError(f"Error creating phext textmap: {str(e)}")
+        return phext_textmap(file_path)
     
     @mcp.tool()
-    def phext_normalize(file_path: Optional[str] = None) -> str:
+    def enhanced_phext_normalize(file_path: Optional[str] = None) -> str:
         """Normalize a phext file (clean up and optimize structure)."""
-        try:
-            actual_file_path = state.get_file_path(file_path)
-            buffer = state.load_file(actual_file_path)
-            normalized = state.phext.normalize(buffer)
-            state.phext_buffers[actual_file_path] = normalized
-            state.save_file(actual_file_path)
-            return f"Successfully normalized phext file: {actual_file_path}"
-        except Exception as e:
-            raise RuntimeError(f"Error normalizing phext file: {str(e)}")
+        return phext_normalize(file_path)
     
     @mcp.tool()
-    def phext_merge(left_file: str, right_file: str, output_file: Optional[str] = None) -> str:
+    def enhanced_phext_merge(left_file: str, right_file: str, output_file: Optional[str] = None) -> str:
         """Merge two phext files together."""
-        try:
-            left_path = state.get_file_path(left_file)
-            right_path = state.get_file_path(right_file)
-            output_path = state.get_file_path(output_file or left_file)
-            
-            left_buffer = state.load_file(left_path)
-            right_buffer = state.load_file(right_path)
-            merged = state.phext.merge(left_buffer, right_buffer)
-            state.phext_buffers[output_path] = merged
-            state.save_file(output_path)
-            
-            return f"Successfully merged {left_path} and {right_path} into {output_path}"
-        except Exception as e:
-            raise RuntimeError(f"Error merging phext files: {str(e)}")
+        return phext_merge(left_file, right_file, output_file)
     
     @mcp.tool()
-    def phext_create_file(file_path: str, initial_content: Optional[str] = None) -> str:
+    def enhanced_phext_create_file(file_path: str, initial_content: Optional[str] = None) -> str:
         """Create a new phext file."""
-        try:
-            actual_file_path = state.get_file_path(file_path)
-            
-            # Create new phext file
-            if initial_content:
-                # If initial content provided, insert it at the default coordinate
-                default_coord = state.phext.defaultCoordinate()
-                new_buffer = state.phext.insert("", default_coord, initial_content)
-            else:
-                new_buffer = ""
-            
-            state.phext_buffers[actual_file_path] = new_buffer
-            state.save_file(actual_file_path)
-            
-            return f"Successfully created phext file: {actual_file_path}"
-        except Exception as e:
-            raise RuntimeError(f"Error creating phext file: {str(e)}")
+        return phext_create_file(file_path, initial_content)
+    
+    # ============================================================================
+    # PERFORMANCE & MEMORY MANAGEMENT (Will's recommendations)
+    # ============================================================================
+    
+    @mcp.tool()
+    def performance_phext_load_to_memory(file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Explicitly load file into hash for performance."""
+        return phext_load_to_memory(file_path)
+    
+    @mcp.tool()
+    def performance_phext_flush_to_disk(file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Force save dirty hashes to disk."""
+        return phext_flush_to_disk(file_path)
+    
+    @mcp.tool()
+    def performance_phext_memory_status() -> Dict[str, Any]:
+        """Show what's loaded in memory."""
+        return phext_memory_status()
+    
+    @mcp.tool()
+    def performance_phext_unload_file(file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Unload a file from memory (saves if dirty first)."""
+        return phext_unload_file(file_path)
+    
+    @mcp.tool()
+    def performance_phext_file_info(file_path: Optional[str] = None) -> Dict[str, Any]:
+        """File metadata (size, coordinate count, etc.)."""
+        return phext_file_info(file_path)
+    
+    @mcp.tool()
+    def performance_phext_optimize_memory() -> Dict[str, Any]:
+        """Optimize memory usage by cleaning up and reorganizing data."""
+        return phext_optimize_memory()
+    
+    # ============================================================================
+    # SQ-STYLE API (Database-like operations inspired by SQ REST API)
+    # ============================================================================
+    
+    @mcp.tool()
+    def sq_phext_select(coordinate: str, file_path: Optional[str] = None) -> str:
+        """SQ-style select: Alias for fetch but with database-style naming."""
+        return phext_select(coordinate, file_path)
+    
+    @mcp.tool()
+    def sq_phext_toc(file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Table of contents (enhanced textmap) showing structure and metadata."""
+        return phext_toc(file_path)
+    
+    @mcp.tool()
+    def sq_phext_delta(file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Hierarchical checksum map for integrity verification."""
+        return phext_delta(file_path)
+    
+    @mcp.tool()
+    def sq_phext_checksum(file_path: Optional[str] = None) -> Dict[str, Any]:
+        """File-level checksum for quick integrity verification."""
+        return phext_checksum(file_path)
+    
+    @mcp.tool()
+    def sq_phext_push(local_file_path: str, coordinate: str, phext_file_path: Optional[str] = None) -> str:
+        """Write local file content to a specific coordinate in phext."""
+        return phext_push(local_file_path, coordinate, phext_file_path)
+    
+    @mcp.tool()
+    def sq_phext_pull(coordinate: str, local_file_path: str, phext_file_path: Optional[str] = None) -> str:
+        """Fetch coordinate content to a local file."""
+        return phext_pull(coordinate, local_file_path, phext_file_path)
+    
+    @mcp.tool()
+    def sq_phext_get_full(file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Complete file copy with all metadata (SQ-style get operation)."""
+        return phext_get_full(file_path)
+    
+    # ============================================================================
+    # ADVANCED COORDINATE OPERATIONS
+    # ============================================================================
+    
+    @mcp.tool()
+    def coord_phext_coordinate_info(coordinate: str) -> Dict[str, Any]:
+        """Analyze coordinate structure and provide detailed information."""
+        return phext_coordinate_info(coordinate)
+    
+    @mcp.tool()
+    def coord_phext_parse_coordinate(coordinate: str) -> Dict[str, Any]:
+        """Validate and parse coordinate strings."""
+        return phext_parse_coordinate(coordinate)
+    
+    @mcp.tool()
+    def coord_phext_navigate(from_coordinate: str, direction: str, steps: int = 1, file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Navigate through dimensions (up/down/left/right/forward/back)."""
+        return phext_navigate(from_coordinate, direction, steps, file_path)
+    
+    @mcp.tool()
+    def coord_phext_find_next_scroll(coordinate: str, file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Get next available coordinate in sequence."""
+        return phext_find_next_scroll(coordinate, file_path)
+    
+    @mcp.tool()
+    def coord_phext_coordinate_distance(coord1: str, coord2: str) -> Dict[str, Any]:
+        """Calculate distance between coordinates."""
+        return phext_coordinate_distance(coord1, coord2)
+    
+    @mcp.tool()
+    def coord_phext_coordinate_bounds(file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Find min/max coordinates in file."""
+        return phext_coordinate_bounds(file_path)
+    
+    # ============================================================================
+    # BULK OPERATIONS
+    # ============================================================================
+    
+    @mcp.tool()
+    def bulk_phext_bulk_insert(coordinate_content_pairs: List[Dict[str, str]], file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Insert multiple coordinate→content pairs efficiently."""
+        return phext_bulk_insert(coordinate_content_pairs, file_path)
+    
+    @mcp.tool()
+    def bulk_phext_bulk_fetch(coordinates: List[str], file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Fetch multiple coordinates at once."""
+        return phext_bulk_fetch(coordinates, file_path)
+    
+    @mcp.tool()
+    def bulk_phext_bulk_update(coordinate_content_pairs: List[Dict[str, str]], file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Update multiple coordinates atomically."""
+        return phext_bulk_update(coordinate_content_pairs, file_path)
+    
+    @mcp.tool()
+    def bulk_phext_bulk_delete(coordinates: List[str], file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Remove multiple coordinates efficiently."""
+        return phext_bulk_delete(coordinates, file_path)
+    
+    @mcp.tool()
+    def bulk_phext_range_select(start_coordinate: str, end_coordinate: str, file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Fetch all coordinates in range."""
+        return phext_range_select(start_coordinate, end_coordinate, file_path)
+    
+    @mcp.tool()
+    def bulk_phext_range_delete(start_coordinate: str, end_coordinate: str, file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Delete all coordinates in range."""
+        return phext_range_delete(start_coordinate, end_coordinate, file_path)
+    
+    @mcp.tool()
+    def bulk_phext_range_copy(start_coordinate: str, end_coordinate: str, dest_start_coordinate: str, file_path: Optional[str] = None, dest_file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Copy range to different location."""
+        return phext_range_copy(start_coordinate, end_coordinate, dest_start_coordinate, file_path, dest_file_path)
+    
+    @mcp.tool()
+    def bulk_phext_range_move(start_coordinate: str, end_coordinate: str, dest_start_coordinate: str, file_path: Optional[str] = None, dest_file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Move range to different location."""
+        return phext_range_move(start_coordinate, end_coordinate, dest_start_coordinate, file_path, dest_file_path)
+    
+    # ============================================================================
+    # SEARCH AND QUERY TOOLS
+    # ============================================================================
+    
+    @mcp.tool()
+    def search_phext_search_content(query: str, file_path: Optional[str] = None, case_sensitive: bool = False, whole_words: bool = False) -> Dict[str, Any]:
+        """Text search across all coordinates."""
+        return phext_search_content(query, file_path, case_sensitive, whole_words)
+    
+    @mcp.tool()
+    def search_phext_search_coordinates(pattern: str, file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Search by coordinate patterns."""
+        return phext_search_coordinates(pattern, file_path)
+    
+    @mcp.tool()
+    def search_phext_search_regex(regex_pattern: str, file_path: Optional[str] = None, search_coordinates: bool = False) -> Dict[str, Any]:
+        """Regular expression search in content or coordinates."""
+        return phext_search_regex(regex_pattern, file_path, search_coordinates)
+    
+    @mcp.tool()
+    def search_phext_find_empty(file_path: Optional[str] = None, include_whitespace_only: bool = True) -> Dict[str, Any]:
+        """Find empty coordinates in file."""
+        return phext_find_empty(file_path, include_whitespace_only)
+    
+    @mcp.tool()
+    def search_phext_find_duplicates(file_path: Optional[str] = None, ignore_whitespace: bool = True) -> Dict[str, Any]:
+        """Find duplicate content across coordinates."""
+        return phext_find_duplicates(file_path, ignore_whitespace)
+    
+    @mcp.tool()
+    def search_phext_filter_coordinates(criteria: Dict[str, Any], file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Filter coordinates by various criteria."""
+        return phext_filter_coordinates(criteria, file_path)
+    
+    @mcp.tool()
+    def search_phext_content_statistics(file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Generate detailed content statistics and analysis."""
+        return phext_content_statistics(file_path)
+    
+    logger.info(f"Registered {len(mcp._tools)} phext tools with enhanced functionality")
     
     return mcp
 
@@ -242,5 +321,9 @@ def main():
     server = create_server(default_phext_file=default_phext_file)
     
     # Start the server
-    logger.info("Phext MCP server starting...")
+    logger.info("Enhanced Phext MCP server starting...")
     server.run()
+
+
+if __name__ == "__main__":
+    main()
